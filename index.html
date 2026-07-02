@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Enrollment Funnel &middot; AppADay 056</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Titillium+Web:ital,wght@0,300;0,400;0,600;0,700;0,900;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink: #0A0A0A;
+    --panel: #141414;
+    --panel-2: #1C1C1A;
+    --hairline: #3A3A36;
+    --paper: #F5F5F0;
+    --paper-dim: #888880;
+    --accent: #FFDB00;
+    --accent-glow: rgba(255,219,0,0.06);
+  }
+
+  *{ box-sizing:border-box; }
+
+  html, body{
+    margin:0;
+    min-height:100dvh;
+    background:var(--ink);
+    color:var(--paper);
+    font-family:'Titillium Web', sans-serif;
+  }
+
+  body{
+    display:flex;
+    flex-direction:column;
+  }
+
+  a{ color:inherit; }
+
+  ::selection{ background:var(--accent); color:var(--ink); }
+
+  *:focus-visible{
+    outline:2px solid var(--accent);
+    outline-offset:2px;
+  }
+
+  /* Header */
+  .header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:14px 18px;
+    border-bottom:1px solid var(--hairline);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    color:var(--paper-dim);
+    flex-wrap:wrap;
+  }
+
+  .header .tag{
+    color:var(--accent);
+  }
+
+  .header a{
+    text-decoration:none;
+    color:var(--paper-dim);
+    border-bottom:1px solid var(--hairline);
+    padding-bottom:1px;
+    transition:color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .header a:hover{
+    color:var(--accent);
+    border-color:var(--accent);
+  }
+
+  .header-right{
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+
+  .icon-btn{
+    width:30px;
+    height:30px;
+    padding:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:transparent;
+    border:1px solid var(--hairline);
+    border-radius:4px;
+    color:var(--paper-dim);
+    cursor:pointer;
+    transition:border-color 0.15s ease, color 0.15s ease;
+  }
+
+  .icon-btn:hover{
+    border-color:var(--accent);
+    color:var(--accent);
+  }
+
+  .icon-btn svg{
+    width:16px;
+    height:16px;
+  }
+
+  /* Main layout */
+  main{
+    flex:1;
+    width:100%;
+    max-width:980px;
+    margin:0 auto;
+    padding:28px 18px 60px;
+    display:flex;
+    flex-direction:column;
+    gap:28px;
+  }
+
+  .titleblock{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+
+  .accent-rule{
+    width:48px;
+    height:3px;
+    background:var(--accent);
+  }
+
+  h1{
+    font-family:'Titillium Web', sans-serif;
+    font-weight:900;
+    font-size:clamp(28px, 5vw, 40px);
+    margin:0;
+    letter-spacing:-0.01em;
+  }
+
+  .subtitle{
+    font-family:Georgia, serif;
+    font-style:italic;
+    color:var(--paper-dim);
+    font-size:15px;
+    max-width:52ch;
+    line-height:1.55;
+    margin:0;
+  }
+
+  /* Layout grid: funnel + control ledger */
+  .workspace{
+    display:grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap:22px;
+    align-items:start;
+  }
+
+  @media (max-width: 760px){
+    .workspace{
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--hairline);
+    border-radius:6px;
+    padding:20px;
+  }
+
+  /* Funnel panel */
+  .funnel-panel{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+
+  .funnel-svg-wrap{
+    position:relative;
+  }
+
+  svg#funnel{
+    width:100%;
+    height:auto;
+    display:block;
+  }
+
+  .stage-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    font-weight:600;
+    fill:var(--paper);
+  }
+
+  .stage-value{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:21px;
+    font-weight:700;
+  }
+
+  .name-line{
+    stroke:var(--hairline);
+    stroke-width:1;
+    stroke-dasharray:2 3;
+  }
+
+  .conv-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    fill:var(--paper-dim);
+  }
+
+  .conv-line{
+    stroke:var(--hairline);
+    stroke-width:1;
+    stroke-dasharray:2 3;
+  }
+
+  /* Yield summary strip */
+  .yield-strip{
+    display:flex;
+    gap:18px;
+    flex-wrap:wrap;
+    padding-top:10px;
+    border-top:1px solid var(--hairline);
+  }
+
+  .yield-stat{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+
+  .yield-stat .num{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:22px;
+    font-weight:600;
+    color:var(--accent);
+  }
+
+  .yield-stat .lbl{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    color:var(--paper-dim);
+  }
+
+  .funnel-actions{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-top:16px;
+  }
+
+  .funnel-actions button svg{
+    width:14px;
+    height:14px;
+  }
+
+  .export-status{
+    font-size:12px;
+    color:var(--paper-dim);
+  }
+
+  .export-status.warn{
+    color:var(--accent);
+  }
+
+  /* Ledger / input panel */
+  .ledger-panel h2{
+    font-family:'Titillium Web', sans-serif;
+    font-weight:700;
+    font-size:18px;
+    margin:0 0 4px;
+  }
+
+  .ledger-hint{
+    font-size:12.5px;
+    color:var(--paper-dim);
+    margin:0 0 16px;
+    line-height:1.5;
+  }
+
+  .stage-row{
+    display:grid;
+    grid-template-columns: 20px 1fr 96px;
+    align-items:center;
+    gap:10px;
+    padding:10px 0;
+    border-bottom:1px solid var(--hairline);
+  }
+
+  .stage-row:last-of-type{
+    border-bottom:none;
+  }
+
+  .swatch{
+    width:12px;
+    height:12px;
+    border-radius:2px;
+    flex-shrink:0;
+  }
+
+  .stage-name{
+    font-size:14px;
+    font-weight:500;
+  }
+
+  .stage-drop{
+    display:block;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    color:var(--paper-dim);
+    margin-top:2px;
+  }
+
+  input.stage-input{
+    width:100%;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:16px;
+    background:var(--panel-2);
+    color:var(--paper);
+    border:1px solid var(--hairline);
+    border-radius:4px;
+    padding:8px 10px;
+    text-align:right;
+  }
+
+  input.stage-input:focus{
+    border-color:var(--accent);
+    box-shadow:0 0 0 3px var(--accent-glow);
+  }
+
+  .add-row-controls{
+    display:flex;
+    gap:8px;
+    margin-top:16px;
+  }
+
+  button{
+    font-family:'Titillium Web', sans-serif;
+    font-size:13px;
+    font-weight:600;
+    border-radius:4px;
+    border:1px solid var(--hairline);
+    background:var(--panel-2);
+    color:var(--paper);
+    padding:9px 14px;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    transition:border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  button:hover{
+    border-color:var(--accent);
+    color:var(--accent);
+    box-shadow:0 0 0 3px var(--accent-glow);
+  }
+
+  button.reset{
+    background:transparent;
+  }
+
+  button.primary{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:var(--ink);
+  }
+
+  button.primary:hover{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:var(--ink);
+  }
+
+  button.ghost{
+    background:transparent;
+  }
+
+  /* Settings modal */
+  .modal-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.7);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    z-index:50;
+  }
+
+  .modal-overlay.open{
+    display:flex;
+  }
+
+  .modal{
+    width:100%;
+    max-width:420px;
+    max-height:85vh;
+    overflow-y:auto;
+    background:var(--panel);
+    border:1px solid var(--hairline);
+    border-radius:6px;
+    padding:22px;
+  }
+
+  .modal-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:6px;
+  }
+
+  .modal-header h2{
+    font-family:'Titillium Web', sans-serif;
+    font-weight:700;
+    font-size:17px;
+    margin:0;
+  }
+
+  .modal-hint{
+    font-size:12.5px;
+    color:var(--paper-dim);
+    line-height:1.5;
+    margin:0 0 16px;
+  }
+
+  .stepper-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:12px 0;
+    border-top:1px solid var(--hairline);
+    border-bottom:1px solid var(--hairline);
+    margin-bottom:16px;
+  }
+
+  .stepper-label{
+    font-size:13.5px;
+    font-weight:600;
+  }
+
+  .stepper{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+
+  .stepper-btn{
+    width:30px;
+    height:30px;
+    padding:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:16px;
+    line-height:1;
+    border-radius:4px;
+    border:1px solid var(--hairline);
+    background:var(--panel-2);
+    color:var(--paper);
+    cursor:pointer;
+  }
+
+  .stepper-btn:hover:not(:disabled){
+    border-color:var(--accent);
+    color:var(--accent);
+  }
+
+  .stepper-btn:disabled{
+    opacity:0.35;
+    cursor:not-allowed;
+  }
+
+  .stepper-count{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:16px;
+    min-width:16px;
+    text-align:center;
+  }
+
+  .name-field{
+    margin-bottom:12px;
+  }
+
+  .name-field label{
+    display:block;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    color:var(--paper-dim);
+    margin-bottom:4px;
+  }
+
+  .name-field input{
+    width:100%;
+    font-family:'Titillium Web', sans-serif;
+    font-size:16px;
+    background:var(--panel-2);
+    color:var(--paper);
+    border:1px solid var(--hairline);
+    border-radius:4px;
+    padding:8px 10px;
+  }
+
+  .name-field input:focus{
+    border-color:var(--accent);
+    box-shadow:0 0 0 3px var(--accent-glow);
+  }
+
+  .import-textarea{
+    width:100%;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:15px;
+    line-height:1.5;
+    background:var(--panel-2);
+    color:var(--paper);
+    border:1px solid var(--hairline);
+    border-radius:4px;
+    padding:10px 12px;
+    resize:vertical;
+    min-height:120px;
+  }
+
+  .import-textarea:focus{
+    border-color:var(--accent);
+    box-shadow:0 0 0 3px var(--accent-glow);
+  }
+
+  .import-status{
+    font-size:12px;
+    color:var(--paper-dim);
+    margin:8px 0 0;
+    min-height:16px;
+  }
+
+  .import-status.warn{
+    color:var(--accent);
+  }
+
+  .modal-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    margin-top:18px;
+  }
+
+  footer{
+    text-align:center;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    color:var(--paper-dim);
+    padding:0 18px 24px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div><span class="tag">056</span> &middot; Enrollment Funnel</div>
+  <div class="header-right">
+    <button type="button" class="icon-btn" id="settingsBtn" aria-label="Funnel settings" aria-haspopup="dialog">
+      <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none">
+        <circle cx="12" cy="12" r="3"></circle>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+      </svg>
+    </button>
+    <a href="https://augustineiacopelli.github.io/appaday/">&larr; AppADay Portfolio</a>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-header">
+      <h2 id="modalTitle">Funnel settings</h2>
+      <button type="button" class="icon-btn" id="modalCloseBtn" aria-label="Close settings">
+        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    <p class="modal-hint">Set how many stages the funnel has, from 2 to 8, then label each one.</p>
+    <div class="stepper-row">
+      <span class="stepper-label">Number of stages</span>
+      <div class="stepper">
+        <button type="button" class="stepper-btn" id="stepDown" aria-label="Decrease stage count">&minus;</button>
+        <span class="stepper-count" id="stepCount">4</span>
+        <button type="button" class="stepper-btn" id="stepUp" aria-label="Increase stage count">+</button>
+      </div>
+    </div>
+    <div id="nameFieldsWrap"></div>
+    <div class="modal-actions">
+      <button type="button" class="ghost" id="modalCancelBtn">Cancel</button>
+      <button type="button" class="primary" id="modalApplyBtn">Apply</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="importOverlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="importTitle">
+    <div class="modal-header">
+      <h2 id="importTitle">Import data</h2>
+      <button type="button" class="icon-btn" id="importCloseBtn" aria-label="Close import">
+        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    <p class="modal-hint">Paste one stage per line as <strong>Name, Count</strong>. Commas or tabs both work. This replaces every stage currently on the funnel, keeping between 2 and 8 rows.</p>
+    <textarea id="importText" class="import-textarea" rows="7" spellcheck="false" placeholder="Inquiries, 2400&#10;Applications, 980&#10;Accepted, 640&#10;Enrolled, 410"></textarea>
+    <p class="import-status" id="importStatus">&nbsp;</p>
+    <div class="modal-actions">
+      <button type="button" class="ghost" id="importCancelBtn">Cancel</button>
+      <button type="button" class="primary" id="importApplyBtn">Import</button>
+    </div>
+  </div>
+</div>
+
+<main>
+  <div class="titleblock">
+    <div class="accent-rule"></div>
+    <h1>Enrollment Funnel</h1>
+    <p class="subtitle">Enter a count for each stage of your pipeline and watch the funnel narrow to scale, with the conversion rate between every stage shown along the way. Use the settings gear to change how many stages the funnel has and what each one is called.</p>
+  </div>
+
+  <div class="workspace">
+    <div class="panel funnel-panel">
+      <div class="funnel-svg-wrap">
+        <svg id="funnel" viewBox="0 0 460 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Funnel chart of admissions stages"></svg>
+      </div>
+      <div class="yield-strip" id="yieldStrip"></div>
+      <div class="funnel-actions">
+        <button type="button" class="reset" id="exportBtn">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Export as JPG
+        </button>
+        <span class="export-status" id="exportStatus">&nbsp;</span>
+      </div>
+    </div>
+
+    <div class="panel ledger-panel">
+      <h2>Pipeline stages</h2>
+      <p class="ledger-hint">Values update the funnel live. Order runs top to bottom, widest to narrowest.</p>
+      <div id="stageRows"></div>
+      <div class="add-row-controls">
+        <button type="button" class="reset" id="resetBtn">Reset to sample data</button>
+        <button type="button" class="reset" id="importBtn">Import data</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>AppADay &middot; 056 &middot; Data</footer>
+
+<script>
+window.addEventListener('load', function () {
+
+  var STORAGE_KEY = 'appaday056_enrollmentFunnel';
+
+  var MIN_STAGES = 2;
+  var MAX_STAGES = 8;
+
+  var defaultStages = [
+    { name: 'Inquiries', value: 2400 },
+    { name: 'Applications', value: 980 },
+    { name: 'Accepted', value: 640 },
+    { name: 'Enrolled', value: 410 }
+  ];
+
+  function colorForIndex(i, total) {
+    var t = total > 1 ? i / (total - 1) : 1;
+    var r = Math.round(36 + (255 - 36) * t);
+    var g = Math.round(36 + (219 - 36) * t);
+    var b = Math.round(34 + (0 - 34) * t);
+    function hex2(n) {
+      var s = n.toString(16);
+      return s.length < 2 ? '0' + s : s;
+    }
+    var fill = '#' + hex2(r) + hex2(g) + hex2(b);
+    var luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    var text = luminance > 0.55 ? '#0A0A0A' : '#F5F5F0';
+    return { fill: fill, text: text };
+  }
+
+  function defaultNameFor(i) {
+    var base = ['Inquiries', 'Applications', 'Accepted', 'Enrolled'];
+    return base[i] || ('Stage ' + (i + 1));
+  }
+
+  var measureCanvas = document.createElement('canvas');
+  var measureCtx = measureCanvas.getContext('2d');
+
+  function measureTextWidth(text, fontPx, fontWeight) {
+    try {
+      if (!measureCtx) return String(text).length * fontPx * 0.62;
+      measureCtx.font = fontWeight + ' ' + fontPx + 'px IBM Plex Mono, monospace';
+      return measureCtx.measureText(String(text)).width;
+    } catch (e) {
+      return String(text).length * fontPx * 0.62;
+    }
+  }
+
+  var stages = loadStages();
+
+  function loadStages() {
+    try {
+      var raw = window.localStorage.getItem(STORAGE_KEY);
+      if (!raw) return copyStages(defaultStages);
+      var parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed) || parsed.length < MIN_STAGES || parsed.length > MAX_STAGES) return copyStages(defaultStages);
+      for (var i = 0; i < parsed.length; i++) {
+        if (typeof parsed[i].name !== 'string' || typeof parsed[i].value !== 'number') return copyStages(defaultStages);
+      }
+      return parsed;
+    } catch (e) {
+      return copyStages(defaultStages);
+    }
+  }
+
+  function copyStages(src) {
+    return src.map(function (s) { return { name: s.name, value: s.value }; });
+  }
+
+  function saveStages() {
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(stages));
+    } catch (e) {
+      /* ignore in sandboxed contexts */
+    }
+  }
+
+  var rowsEl = document.getElementById('stageRows');
+  var svg = document.getElementById('funnel');
+  var yieldStrip = document.getElementById('yieldStrip');
+  var resetBtn = document.getElementById('resetBtn');
+
+  function buildRows() {
+    rowsEl.innerHTML = '';
+    stages.forEach(function (stage, i) {
+      var row = document.createElement('div');
+      row.className = 'stage-row';
+
+      var swatch = document.createElement('div');
+      swatch.className = 'swatch';
+      swatch.style.background = colorForIndex(i, stages.length).fill;
+
+      var nameWrap = document.createElement('div');
+      var nameEl = document.createElement('div');
+      nameEl.className = 'stage-name';
+      nameEl.textContent = stage.name;
+      nameWrap.appendChild(nameEl);
+
+      if (i > 0) {
+        var dropEl = document.createElement('span');
+        dropEl.className = 'stage-drop';
+        dropEl.id = 'drop-' + i;
+        nameWrap.appendChild(dropEl);
+      }
+
+      var input = document.createElement('input');
+      input.className = 'stage-input';
+      input.type = 'number';
+      input.min = '0';
+      input.inputMode = 'numeric';
+      input.value = String(stage.value);
+      input.setAttribute('aria-label', stage.name + ' count');
+      input.addEventListener('input', function () {
+        var v = parseInt(input.value, 10);
+        stages[i].value = isNaN(v) || v < 0 ? 0 : v;
+        saveStages();
+        render();
+      });
+
+      row.appendChild(swatch);
+      row.appendChild(nameWrap);
+      row.appendChild(input);
+      rowsEl.appendChild(row);
+    });
+  }
+
+  var SVG_NS = 'http://www.w3.org/2000/svg';
+
+  function el(tag, attrs) {
+    var e = document.createElementNS(SVG_NS, tag);
+    for (var k in attrs) {
+      e.setAttribute(k, attrs[k]);
+    }
+    return e;
+  }
+
+  function render() {
+    svg.innerHTML = '';
+
+    var maxVal = 0;
+    stages.forEach(function (s) { if (s.value > maxVal) maxVal = s.value; });
+    var baseline = stages[0].value > 0 ? stages[0].value : maxVal;
+    if (baseline <= 0) baseline = 1;
+
+    var minW = 60;
+    var maxW = 280;
+    var segH = 66;
+    var topPad = 10;
+    var bottomPad = 30;
+    var cx = 190;
+    var totalWidth = 520;
+    var labelX = 380;
+    var widthCeiling = 300;
+
+    var totalHeight = topPad + stages.length * segH + bottomPad;
+    svg.setAttribute('viewBox', '0 0 ' + totalWidth + ' ' + totalHeight);
+
+    function widthFor(v) {
+      var ratio = v / baseline;
+      if (ratio > 1) ratio = 1;
+      if (ratio < 0) ratio = 0;
+      return minW + (maxW - minW) * ratio;
+    }
+
+    var widths = stages.map(function (s) {
+      var proportional = widthFor(s.value);
+      var valueW = measureTextWidth(s.value.toLocaleString(), 21, '700') + 26;
+      var required = Math.max(valueW, minW);
+      return Math.min(Math.max(proportional, required), widthCeiling);
+    });
+
+    stages.forEach(function (stage, i) {
+      var yTop = topPad + i * segH;
+      var yBot = yTop + segH;
+      var yMid = yTop + segH / 2;
+      var wTop = widths[i];
+      var wBot = i < stages.length - 1 ? widths[i + 1] : widths[i] * 0.86;
+
+      var leftTop = cx - wTop / 2;
+      var rightTop = cx + wTop / 2;
+      var leftBot = cx - wBot / 2;
+      var rightBot = cx + wBot / 2;
+
+      var segColor = colorForIndex(i, stages.length);
+
+      var path = el('path', {
+        d: 'M ' + leftTop + ',' + yTop + ' L ' + rightTop + ',' + yTop + ' L ' + rightBot + ',' + yBot + ' L ' + leftBot + ',' + yBot + ' Z',
+        fill: segColor.fill,
+        stroke: '#0A0A0A',
+        'stroke-width': '1.5'
+      });
+      svg.appendChild(path);
+
+      var valueLabel = el('text', {
+        x: cx, y: yMid + 7,
+        'text-anchor': 'middle',
+        class: 'stage-value',
+        fill: segColor.text
+      });
+      valueLabel.textContent = stage.value.toLocaleString();
+      svg.appendChild(valueLabel);
+
+      var nameLine = el('line', {
+        x1: rightTop + 4, y1: yMid,
+        x2: labelX - 6, y2: yMid,
+        class: 'name-line'
+      });
+      svg.appendChild(nameLine);
+
+      var nameLabel = el('text', {
+        x: labelX, y: yMid + 4,
+        'text-anchor': 'start',
+        class: 'stage-label'
+      });
+      nameLabel.textContent = stage.name;
+      svg.appendChild(nameLabel);
+
+      if (i > 0) {
+        var prevVal = stages[i - 1].value;
+        var pct = prevVal > 0 ? (stage.value / prevVal * 100) : 0;
+        var pctText = prevVal > 0 ? pct.toFixed(1) + '%' : 'n/a';
+        var dropCount = prevVal - stage.value;
+
+        var connLine = el('line', {
+          x1: rightTop + 4, y1: yTop,
+          x2: labelX - 6, y2: yTop,
+          class: 'conv-line'
+        });
+        svg.appendChild(connLine);
+
+        var convLabel = el('text', {
+          x: labelX, y: yTop + 4,
+          'text-anchor': 'start',
+          class: 'conv-label'
+        });
+        convLabel.textContent = pctText + ' converted';
+        svg.appendChild(convLabel);
+
+        var dropEl = document.getElementById('drop-' + i);
+        if (dropEl) {
+          dropEl.textContent = prevVal > 0
+            ? (dropCount >= 0 ? dropCount.toLocaleString() + ' lost from prior stage' : 'gained ' + Math.abs(dropCount).toLocaleString())
+            : '';
+        }
+      }
+    });
+
+    renderYield();
+  }
+
+  function renderYield() {
+    yieldStrip.innerHTML = '';
+    var first = stages[0].value;
+    var last = stages[stages.length - 1].value;
+    var overall = first > 0 ? (last / first * 100) : 0;
+    var totalLost = first - last;
+
+    var stats = [
+      { num: first > 0 ? overall.toFixed(1) + '%' : 'n/a', lbl: 'Overall yield' },
+      { num: totalLost.toLocaleString(), lbl: 'Total lost' },
+      { num: last.toLocaleString(), lbl: stages[stages.length - 1].name }
+    ];
+
+    stats.forEach(function (s) {
+      var wrap = document.createElement('div');
+      wrap.className = 'yield-stat';
+      var num = document.createElement('div');
+      num.className = 'num';
+      num.textContent = s.num;
+      var lbl = document.createElement('div');
+      lbl.className = 'lbl';
+      lbl.textContent = s.lbl;
+      wrap.appendChild(num);
+      wrap.appendChild(lbl);
+      yieldStrip.appendChild(wrap);
+    });
+  }
+
+  resetBtn.addEventListener('click', function () {
+    stages = copyStages(defaultStages);
+    saveStages();
+    buildRows();
+    render();
+  });
+
+  var exportBtn = document.getElementById('exportBtn');
+  var exportStatus = document.getElementById('exportStatus');
+
+  function setExportStatus(msg, isWarn) {
+    exportStatus.textContent = msg;
+    exportStatus.className = 'export-status' + (isWarn ? ' warn' : '');
+  }
+
+  function exportFunnelAsJPG() {
+    try {
+      var vb = svg.getAttribute('viewBox').split(' ');
+      var vbWidth = parseFloat(vb[2]);
+      var vbHeight = parseFloat(vb[3]);
+      if (!vbWidth || !vbHeight) {
+        setExportStatus('Nothing to export yet.', true);
+        return;
+      }
+
+      var clone = svg.cloneNode(true);
+      clone.setAttribute('width', vbWidth);
+      clone.setAttribute('height', vbHeight);
+
+      var styleEl = document.createElementNS(SVG_NS, 'style');
+      styleEl.textContent =
+        'text{font-family:"IBM Plex Mono",monospace;}' +
+        '.stage-label{font-size:13px;font-weight:600;fill:#F5F5F0;}' +
+        '.stage-value{font-size:21px;font-weight:700;}' +
+        '.conv-label{font-size:11px;fill:#888880;}' +
+        '.conv-line,.name-line{stroke:#3A3A36;stroke-width:1;stroke-dasharray:2 3;}';
+      clone.insertBefore(styleEl, clone.firstChild);
+
+      var svgString = new XMLSerializer().serializeToString(clone);
+      var svgDataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgString);
+
+      var scale = 2;
+      var img = new Image();
+
+      img.onload = function () {
+        try {
+          var canvas = document.createElement('canvas');
+          canvas.width = vbWidth * scale;
+          canvas.height = vbHeight * scale;
+          var ctx = canvas.getContext('2d');
+          if (!ctx) {
+            setExportStatus('Export is not supported in this browser.', true);
+            return;
+          }
+          ctx.fillStyle = '#0A0A0A';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+          var jpgUrl = canvas.toDataURL('image/jpeg', 0.92);
+          var link = document.createElement('a');
+          link.href = jpgUrl;
+          link.download = 'enrollment-funnel.jpg';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          setExportStatus('Downloaded.', false);
+        } catch (e) {
+          setExportStatus('Export failed. Try again.', true);
+        }
+      };
+
+      img.onerror = function () {
+        setExportStatus('Export failed. Try again.', true);
+      };
+
+      setExportStatus('Preparing image...', false);
+      img.src = svgDataUrl;
+    } catch (e) {
+      setExportStatus('Export failed. Try again.', true);
+    }
+  }
+
+  exportBtn.addEventListener('click', exportFunnelAsJPG);
+
+  var settingsBtn = document.getElementById('settingsBtn');
+  var modalOverlay = document.getElementById('modalOverlay');
+  var modalCloseBtn = document.getElementById('modalCloseBtn');
+  var modalCancelBtn = document.getElementById('modalCancelBtn');
+  var modalApplyBtn = document.getElementById('modalApplyBtn');
+  var stepDownBtn = document.getElementById('stepDown');
+  var stepUpBtn = document.getElementById('stepUp');
+  var stepCountEl = document.getElementById('stepCount');
+  var nameFieldsWrap = document.getElementById('nameFieldsWrap');
+
+  var tempCount = stages.length;
+  var tempNames = [];
+
+  function onModalKeydown(e) {
+    if (e.key === 'Escape') closeModal();
+  }
+
+  function openModal() {
+    tempCount = stages.length;
+    tempNames = stages.map(function (s) { return s.name; });
+    updateStepperUI();
+    renderNameFields();
+    modalOverlay.classList.add('open');
+    document.addEventListener('keydown', onModalKeydown);
+  }
+
+  function closeModal() {
+    modalOverlay.classList.remove('open');
+    document.removeEventListener('keydown', onModalKeydown);
+  }
+
+  function updateStepperUI() {
+    stepCountEl.textContent = String(tempCount);
+    stepDownBtn.disabled = tempCount <= MIN_STAGES;
+    stepUpBtn.disabled = tempCount >= MAX_STAGES;
+  }
+
+  function renderNameFields() {
+    nameFieldsWrap.innerHTML = '';
+    for (var i = 0; i < tempCount; i++) {
+      var field = document.createElement('div');
+      field.className = 'name-field';
+
+      var label = document.createElement('label');
+      label.setAttribute('for', 'nameField' + i);
+      label.textContent = 'Stage ' + (i + 1);
+
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.id = 'nameField' + i;
+      var current = tempNames[i];
+      input.value = current ? current : defaultNameFor(i);
+      (function (idx, inputEl) {
+        inputEl.addEventListener('input', function () {
+          tempNames[idx] = inputEl.value;
+        });
+      })(i, input);
+
+      field.appendChild(label);
+      field.appendChild(input);
+      nameFieldsWrap.appendChild(field);
+    }
+  }
+
+  settingsBtn.addEventListener('click', openModal);
+  modalCloseBtn.addEventListener('click', closeModal);
+  modalCancelBtn.addEventListener('click', closeModal);
+
+  modalOverlay.addEventListener('click', function (e) {
+    if (e.target === modalOverlay) closeModal();
+  });
+
+  stepDownBtn.addEventListener('click', function () {
+    if (tempCount > MIN_STAGES) {
+      tempCount -= 1;
+      updateStepperUI();
+      renderNameFields();
+    }
+  });
+
+  stepUpBtn.addEventListener('click', function () {
+    if (tempCount < MAX_STAGES) {
+      tempCount += 1;
+      while (tempNames.length < tempCount) tempNames.push('');
+      updateStepperUI();
+      renderNameFields();
+    }
+  });
+
+  modalApplyBtn.addEventListener('click', function () {
+    var newStages = [];
+    for (var i = 0; i < tempCount; i++) {
+      var name = (tempNames[i] || '').trim();
+      if (!name) name = defaultNameFor(i);
+      var value;
+      if (stages[i]) {
+        value = stages[i].value;
+      } else {
+        var prevVal = newStages.length
+          ? newStages[newStages.length - 1].value
+          : (stages.length ? stages[stages.length - 1].value : 100);
+        value = Math.round(prevVal / 2);
+      }
+      newStages.push({ name: name, value: value });
+    }
+    stages = newStages;
+    saveStages();
+    buildRows();
+    render();
+    closeModal();
+  });
+
+  var importBtn = document.getElementById('importBtn');
+  var importOverlay = document.getElementById('importOverlay');
+  var importCloseBtn = document.getElementById('importCloseBtn');
+  var importCancelBtn = document.getElementById('importCancelBtn');
+  var importApplyBtn = document.getElementById('importApplyBtn');
+  var importText = document.getElementById('importText');
+  var importStatus = document.getElementById('importStatus');
+
+  function onImportKeydown(e) {
+    if (e.key === 'Escape') closeImport();
+  }
+
+  function openImport() {
+    importText.value = '';
+    setImportStatus('\u00A0', false);
+    importOverlay.classList.add('open');
+    document.addEventListener('keydown', onImportKeydown);
+  }
+
+  function closeImport() {
+    importOverlay.classList.remove('open');
+    document.removeEventListener('keydown', onImportKeydown);
+  }
+
+  function setImportStatus(msg, isWarn) {
+    importStatus.textContent = msg;
+    importStatus.className = 'import-status' + (isWarn ? ' warn' : '');
+  }
+
+  function parseImportRows(raw) {
+    var lines = raw.split(/\r?\n/);
+    var rows = [];
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i].trim();
+      if (!line) continue;
+      var parts = line.split(/\t|,/);
+      if (parts.length < 2) continue;
+      var name = parts[0].trim();
+      var countText = parts[1].replace(/[^0-9.\-]/g, '').trim();
+      var value = parseInt(countText, 10);
+      if (!name || isNaN(value) || value < 0) continue;
+      rows.push({ name: name, value: value });
+    }
+    return rows;
+  }
+
+  importBtn.addEventListener('click', openImport);
+  importCloseBtn.addEventListener('click', closeImport);
+  importCancelBtn.addEventListener('click', closeImport);
+
+  importOverlay.addEventListener('click', function (e) {
+    if (e.target === importOverlay) closeImport();
+  });
+
+  importText.addEventListener('input', function () {
+    var rows = parseImportRows(importText.value);
+    if (rows.length === 0) {
+      setImportStatus('\u00A0', false);
+      return;
+    }
+    if (rows.length < MIN_STAGES) {
+      setImportStatus(rows.length + ' row parsed. Needs at least ' + MIN_STAGES + '.', true);
+    } else if (rows.length > MAX_STAGES) {
+      setImportStatus(rows.length + ' rows found. Only the first ' + MAX_STAGES + ' will be used.', true);
+    } else {
+      setImportStatus(rows.length + ' stages ready to import.', false);
+    }
+  });
+
+  importApplyBtn.addEventListener('click', function () {
+    var rows = parseImportRows(importText.value);
+    if (rows.length < MIN_STAGES) {
+      setImportStatus('Add at least ' + MIN_STAGES + ' valid rows as Name, Count before importing.', true);
+      return;
+    }
+    if (rows.length > MAX_STAGES) {
+      rows = rows.slice(0, MAX_STAGES);
+    }
+    stages = rows;
+    saveStages();
+    buildRows();
+    render();
+    closeImport();
+  });
+
+  buildRows();
+  render();
+});
+</script>
+
+</body>
+</html>
